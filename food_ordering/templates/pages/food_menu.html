@@ -1,0 +1,67 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="food-app" data-user="{{ frappe.session.user }}">
+  <header class="food-header">
+    <div>
+      <p class="food-kicker">Fresh Bite Restaurant</p>
+      <h1>Food Menu</h1>
+    </div>
+    <div class="food-user-actions">
+      {% if is_guest %}
+      <a class="food-link" href="/login?redirect-to=/food-menu">Login</a>
+      <a class="food-button" href="/signup?redirect-to=/food-menu">Sign Up</a>
+      {% else %}
+      <span class="food-user">Signed in as {{ frappe.session.user }}</span>
+      <a class="food-link" href="/?cmd=web_logout">Logout</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <section class="food-toolbar">
+    <input id="food-search" type="search" placeholder="Search food, ingredients, or diet tags">
+    <select id="category-filter">
+      <option value="">All Categories</option>
+    </select>
+    <label class="food-toggle">
+      <input id="vegan-filter" type="checkbox">
+      Vegan
+    </label>
+    <label class="food-toggle">
+      <input id="spicy-filter" type="checkbox">
+      Spicy
+    </label>
+  </section>
+
+  <main class="food-layout">
+    <section>
+      <div id="food-grid" class="food-grid"></div>
+    </section>
+
+    <aside class="food-side">
+      <section class="food-panel">
+        <div class="panel-title">
+          <h2>Cart</h2>
+          <button id="clear-cart" class="small-button" type="button">Clear</button>
+        </div>
+        <div id="cart-items" class="cart-items"></div>
+        <div class="cart-total">Total: <span id="cart-total">₹0</span></div>
+      </section>
+
+      <section class="food-panel">
+        <div class="panel-title">
+          <h2>AI Food Chatbot</h2>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+          <div class="bot-message">Ask about calories, ingredients, protein, carbs, vegan options, allergies, spicy food, drinks, diet, or timings.</div>
+        </div>
+        <form id="chat-form" class="chat-form">
+          <input id="chat-input" type="text" placeholder="Ask: calories in Paneer Tikka">
+          <button type="submit">Ask</button>
+        </form>
+      </section>
+    </aside>
+  </main>
+</div>
+{% endblock %}
+

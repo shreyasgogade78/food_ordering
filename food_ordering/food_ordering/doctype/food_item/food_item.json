@@ -1,0 +1,37 @@
+{
+  "doctype": "DocType",
+  "name": "Food Item",
+  "module": "Food Ordering",
+  "custom": 0,
+  "is_submittable": 0,
+  "autoname": "field:item_name",
+  "title_field": "item_name",
+  "image_field": "image",
+  "fields": [
+    {"fieldname": "item_name", "fieldtype": "Data", "label": "Item Name", "reqd": 1, "unique": 1},
+    {"fieldname": "category", "fieldtype": "Link", "label": "Category", "options": "Food Category", "reqd": 1},
+    {"fieldname": "price", "fieldtype": "Currency", "label": "Price", "reqd": 1},
+    {"fieldname": "description", "fieldtype": "Small Text", "label": "Description"},
+    {"fieldname": "image", "fieldtype": "Attach Image", "label": "Image"},
+    {"fieldname": "nutrition_section", "fieldtype": "Section Break", "label": "Nutrition"},
+    {"fieldname": "calories", "fieldtype": "Int", "label": "Calories"},
+    {"fieldname": "protein", "fieldtype": "Float", "label": "Protein (g)"},
+    {"fieldname": "carbs", "fieldtype": "Float", "label": "Carbs (g)"},
+    {"fieldname": "ingredients", "fieldtype": "Small Text", "label": "Ingredients"},
+    {"fieldname": "allergens", "fieldtype": "Small Text", "label": "Allergens"},
+    {"fieldname": "recommendation_section", "fieldtype": "Section Break", "label": "Recommendations"},
+    {"fieldname": "is_vegan", "fieldtype": "Check", "label": "Vegan"},
+    {"fieldname": "is_spicy", "fieldtype": "Check", "label": "Spicy"},
+    {"fieldname": "spicy_level", "fieldtype": "Select", "label": "Spicy Level", "options": "\nMild\nMedium\nHot"},
+    {"fieldname": "recommended_drinks", "fieldtype": "Small Text", "label": "Best Drinks With Meal"},
+    {"fieldname": "diet_tags", "fieldtype": "Small Text", "label": "Diet Tags"},
+    {"fieldname": "disabled", "fieldtype": "Check", "label": "Disabled"}
+  ],
+  "permissions": [
+    {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1},
+    {"role": "Website Manager", "read": 1, "write": 1, "create": 1, "delete": 1},
+    {"role": "Guest", "read": 1},
+    {"role": "Website User", "read": 1}
+  ]
+}
+

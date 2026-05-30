@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Frappe / local bench artifacts
+sites/
+logs/
+env/
+node_modules/
+assets/
+*.log
+
+# OS / editor files
+.DS_Store
+.idea/
+.vscode/
+
+# Secrets
+*.env
+site_config.json
+common_site_config.json
+

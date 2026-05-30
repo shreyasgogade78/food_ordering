@@ -1,0 +1,277 @@
+.food-app {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 18px 48px;
+}
+
+.food-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.food-kicker {
+  margin: 0 0 4px;
+  color: #2b8a3e;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+.food-header h1 {
+  margin: 0;
+  font-size: 38px;
+  letter-spacing: 0;
+}
+
+.food-user-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.food-user {
+  color: #495057;
+}
+
+.food-link {
+  color: #2b8a3e;
+  font-weight: 700;
+}
+
+.food-button,
+.chat-form button,
+.small-button {
+  border: 0;
+  background: #2b8a3e;
+  color: #fff;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.small-button {
+  padding: 7px 10px;
+  background: #495057;
+}
+
+.food-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 190px auto auto;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.food-toolbar input,
+.food-toolbar select,
+.chat-form input {
+  min-height: 42px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  padding: 0 12px;
+  background: #fff;
+}
+
+.food-toggle {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  padding: 0 12px;
+  background: #fff;
+}
+
+.food-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 22px;
+}
+
+.food-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.food-card {
+  overflow: hidden;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 3px 14px rgba(15, 23, 42, 0.06);
+}
+
+.food-image {
+  height: 150px;
+  display: grid;
+  place-items: center;
+  background: #f1f3f5;
+  font-size: 42px;
+}
+
+.food-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.food-card-body {
+  padding: 14px;
+}
+
+.food-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.food-card h3 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.food-card p {
+  min-height: 42px;
+  color: #495057;
+}
+
+.food-meta,
+.food-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+  color: #495057;
+  font-size: 13px;
+}
+
+.food-meta span {
+  background: #f1f3f5;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.food-side {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+
+.food-panel {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: #fff;
+  padding: 16px;
+}
+
+.panel-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.panel-title h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.cart-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.cart-row span {
+  display: block;
+  color: #6c757d;
+  font-size: 13px;
+}
+
+.cart-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qty-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #ced4da;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cart-total {
+  margin-top: 14px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.chat-messages {
+  height: 260px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.bot-message,
+.user-message {
+  max-width: 88%;
+  padding: 9px 10px;
+  border-radius: 8px;
+  line-height: 1.35;
+}
+
+.bot-message {
+  align-self: flex-start;
+  background: #e7f5ff;
+}
+
+.user-message {
+  align-self: flex-end;
+  background: #d3f9d8;
+}
+
+.chat-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.empty-state {
+  color: #6c757d;
+  padding: 14px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+@media (max-width: 900px) {
+  .food-header,
+  .food-layout {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .food-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .food-user-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
