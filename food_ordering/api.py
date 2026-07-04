@@ -282,83 +282,115 @@ def _item_summary(item):
 
 @frappe.whitelist()
 def create_sample_data():
-    categories = ["Starters", "Main Course", "Beverages", "Desserts"]
-    for category in categories:
-        if not frappe.db.exists("Food Category", category):
+    category_descriptions = {
+        "Pizza": "Hand-tossed pizzas with classic and modern toppings.",
+        "Burgers": "Loaded burgers with vegetarian and chicken options.",
+        "Indian": "Indian curries, rice bowls, and tandoori favorites.",
+        "Chinese": "Noodles, rice, and Indo-Chinese comfort food.",
+        "Desserts": "Sweet dishes, cakes, brownies, and chilled desserts.",
+        "Snacks": "Quick bites, fried snacks, and street-food favorites.",
+        "Soft Drinks": "Classic fizzy and chilled bottled drinks.",
+        "Coffee": "Hot and cold coffee beverages.",
+        "Tea": "Indian chai and flavored tea beverages.",
+        "Mocktails": "Refreshing non-alcoholic mixed drinks.",
+        "Shakes": "Thick milkshakes and dessert-style beverages.",
+    }
+
+    category_images = {
+        category: f"/assets/food_ordering/images/{category.lower().replace(' ', '-')}.svg"
+        for category in category_descriptions
+    }
+
+    for category, description in category_descriptions.items():
+        if frappe.db.exists("Food Category", category):
+            doc = frappe.get_doc("Food Category", category)
+        else:
             doc = frappe.new_doc("Food Category")
             doc.category_name = category
-            doc.insert(ignore_permissions=True)
+        doc.description = description
+        doc.image = category_images[category]
+        doc.save(ignore_permissions=True)
+
+    def item(name, category, price, calories, protein, carbs, ingredients, allergens, vegan, spicy, spice, drinks, tags):
+        return {
+            "item_name": name,
+            "category": category,
+            "price": price,
+            "description": f"{name} from our {category} menu.",
+            "image": category_images[category],
+            "calories": calories,
+            "protein": protein,
+            "carbs": carbs,
+            "ingredients": ingredients,
+            "allergens": allergens,
+            "is_vegan": 1 if vegan else 0,
+            "is_spicy": 1 if spicy else 0,
+            "spicy_level": spice if spicy else "",
+            "recommended_drinks": drinks,
+            "diet_tags": tags,
+            "disabled": 0,
+        }
 
     items = [
-        {
-            "item_name": "Paneer Tikka",
-            "category": "Starters",
-            "price": 180,
-            "description": "Grilled paneer with Indian spices.",
-            "calories": 320,
-            "protein": 18,
-            "carbs": 12,
-            "ingredients": "Paneer, curd, capsicum, onion, spices",
-            "allergens": "Dairy",
-            "is_vegan": 0,
-            "is_spicy": 1,
-            "spicy_level": "Medium",
-            "recommended_drinks": "Sweet lassi, lemon soda",
-            "diet_tags": "high protein, vegetarian",
-        },
-        {
-            "item_name": "Veg Burger",
-            "category": "Main Course",
-            "price": 140,
-            "description": "Crispy vegetable patty with fresh salad.",
-            "calories": 420,
-            "protein": 10,
-            "carbs": 55,
-            "ingredients": "Burger bun, vegetable patty, lettuce, tomato, sauce",
-            "allergens": "Gluten",
-            "is_vegan": 0,
-            "is_spicy": 0,
-            "recommended_drinks": "Iced tea, cola",
-            "diet_tags": "vegetarian",
-        },
-        {
-            "item_name": "Vegan Salad Bowl",
-            "category": "Main Course",
-            "price": 160,
-            "description": "Fresh vegetables, chickpeas, and light dressing.",
-            "calories": 260,
-            "protein": 12,
-            "carbs": 35,
-            "ingredients": "Lettuce, chickpeas, cucumber, tomato, olive oil",
-            "allergens": "None",
-            "is_vegan": 1,
-            "is_spicy": 0,
-            "recommended_drinks": "Fresh lime water, coconut water",
-            "diet_tags": "vegan, low calorie, healthy",
-        },
-        {
-            "item_name": "Chocolate Brownie",
-            "category": "Desserts",
-            "price": 120,
-            "description": "Warm chocolate brownie.",
-            "calories": 390,
-            "protein": 6,
-            "carbs": 48,
-            "ingredients": "Chocolate, flour, butter, sugar",
-            "allergens": "Gluten, dairy",
-            "is_vegan": 0,
-            "is_spicy": 0,
-            "recommended_drinks": "Cold coffee",
-            "diet_tags": "dessert",
-        },
+        item("Margherita Pizza", "Pizza", 199, 610, 24, 78, "Pizza base, tomato sauce, mozzarella, basil", "Gluten, dairy", False, False, "", "Lemon iced tea, cola", "vegetarian, classic"),
+        item("Farmhouse Pizza", "Pizza", 279, 720, 28, 86, "Pizza base, cheese, onion, capsicum, mushroom, corn", "Gluten, dairy", False, False, "", "Mint mojito, cola", "vegetarian"),
+        item("Paneer Tikka Pizza", "Pizza", 299, 760, 32, 82, "Pizza base, paneer tikka, cheese, onion, capsicum", "Gluten, dairy", False, True, "Medium", "Sweet lime soda, cold coffee", "vegetarian, high protein"),
+        item("Pepperoni Pizza", "Pizza", 349, 820, 36, 74, "Pizza base, pepperoni, cheese, tomato sauce", "Gluten, dairy", False, True, "Mild", "Cola, iced tea", "non-vegetarian"),
+        item("Veggie Supreme Pizza", "Pizza", 319, 740, 30, 88, "Pizza base, cheese, olives, jalapeno, tomato, onion", "Gluten, dairy", False, True, "Medium", "Blue lagoon, lemon soda", "vegetarian"),
+        item("Chicken BBQ Pizza", "Pizza", 379, 850, 42, 80, "Pizza base, BBQ chicken, cheese, onion, bell pepper", "Gluten, dairy", False, True, "Mild", "Cola, peach iced tea", "non-vegetarian, high protein"),
+        item("Classic Veg Burger", "Burgers", 149, 430, 12, 58, "Burger bun, vegetable patty, lettuce, tomato, sauce", "Gluten", False, False, "", "Cola, iced tea", "vegetarian"),
+        item("Cheese Burger", "Burgers", 179, 520, 18, 54, "Burger bun, patty, cheese slice, lettuce, mayo", "Gluten, dairy", False, False, "", "Cold coffee, cola", "vegetarian"),
+        item("Paneer Makhani Burger", "Burgers", 199, 560, 22, 52, "Burger bun, paneer patty, makhani sauce, onion", "Gluten, dairy", False, True, "Medium", "Sweet lassi, lemon soda", "vegetarian"),
+        item("Crispy Chicken Burger", "Burgers", 219, 610, 31, 56, "Burger bun, fried chicken, lettuce, mayo", "Gluten, egg", False, True, "Mild", "Cola, iced tea", "non-vegetarian"),
+        item("Aloo Tikki Burger", "Burgers", 129, 390, 8, 62, "Burger bun, potato patty, onion, chutney", "Gluten", False, True, "Medium", "Masala tea, lemon soda", "vegetarian"),
+        item("Mushroom Swiss Burger", "Burgers", 229, 540, 20, 48, "Burger bun, mushroom patty, swiss cheese, sauce", "Gluten, dairy", False, False, "", "Cold coffee, cola", "vegetarian"),
+        item("Paneer Butter Masala", "Indian", 249, 480, 22, 28, "Paneer, tomato gravy, butter, cream, spices", "Dairy", False, True, "Medium", "Butter milk, sweet lassi", "vegetarian, high protein"),
+        item("Dal Makhani", "Indian", 219, 420, 18, 46, "Black lentils, kidney beans, butter, cream", "Dairy", False, False, "", "Jeera soda, butter milk", "vegetarian, protein"),
+        item("Veg Biryani", "Indian", 239, 560, 12, 92, "Basmati rice, vegetables, spices, saffron", "None", True, True, "Medium", "Raita, lemon soda", "vegan, rice"),
+        item("Chicken Biryani", "Indian", 299, 680, 38, 78, "Basmati rice, chicken, spices, fried onion", "None", False, True, "Hot", "Mint mojito, cola", "non-vegetarian, high protein"),
+        item("Chole Bhature", "Indian", 189, 720, 20, 96, "Chickpeas, flour, spices, onion, tomato", "Gluten", False, True, "Medium", "Sweet lassi, masala tea", "vegetarian"),
+        item("Masala Dosa", "Indian", 159, 410, 9, 72, "Rice batter, potato masala, chutney, sambar", "None", True, True, "Mild", "Filter coffee, tea", "vegan, south indian"),
+        item("Tandoori Chicken", "Indian", 329, 520, 48, 10, "Chicken, curd, tandoori spices, lemon", "Dairy", False, True, "Hot", "Mint mojito, cola", "non-vegetarian, high protein"),
+        item("Veg Hakka Noodles", "Chinese", 179, 520, 13, 82, "Noodles, cabbage, carrot, capsicum, soy sauce", "Gluten, soy", True, True, "Medium", "Lemon iced tea, cola", "vegan"),
+        item("Schezwan Noodles", "Chinese", 199, 560, 14, 84, "Noodles, schezwan sauce, vegetables, garlic", "Gluten, soy", True, True, "Hot", "Blue lagoon, cola", "vegan, spicy"),
+        item("Veg Manchurian", "Chinese", 189, 440, 10, 58, "Vegetable balls, soy sauce, garlic, spring onion", "Gluten, soy", True, True, "Medium", "Lemon soda, iced tea", "vegan"),
+        item("Chicken Fried Rice", "Chinese", 229, 590, 30, 74, "Rice, chicken, egg, spring onion, soy sauce", "Egg, soy", False, True, "Mild", "Cola, peach iced tea", "non-vegetarian"),
+        item("Chilli Paneer", "Chinese", 219, 510, 24, 42, "Paneer, capsicum, onion, chilli sauce, soy", "Dairy, soy", False, True, "Hot", "Lemon soda, mint mojito", "vegetarian, high protein"),
+        item("Spring Rolls", "Chinese", 149, 360, 8, 48, "Roll sheets, cabbage, carrot, noodles, sauce", "Gluten, soy", True, True, "Mild", "Tea, cola", "vegan, snack"),
+        item("Chocolate Brownie", "Desserts", 129, 390, 6, 48, "Chocolate, flour, butter, sugar", "Gluten, dairy", False, False, "", "Cold coffee, vanilla shake", "dessert"),
+        item("Gulab Jamun", "Desserts", 99, 310, 5, 52, "Khoya, flour, sugar syrup, cardamom", "Dairy, gluten", False, False, "", "Masala tea", "dessert, indian sweet"),
+        item("Cheesecake Slice", "Desserts", 179, 430, 8, 46, "Cream cheese, biscuit base, sugar, vanilla", "Dairy, gluten", False, False, "", "Americano, coffee", "dessert"),
+        item("Ice Cream Sundae", "Desserts", 159, 460, 7, 60, "Ice cream, chocolate sauce, nuts, wafer", "Dairy, nuts, gluten", False, False, "", "Cold coffee", "dessert"),
+        item("Rasmalai", "Desserts", 149, 330, 10, 38, "Paneer dumplings, milk, saffron, pistachio", "Dairy, nuts", False, False, "", "Tea", "dessert, indian sweet"),
+        item("Samosa", "Snacks", 49, 260, 5, 34, "Potato filling, flour, peas, spices", "Gluten", False, True, "Medium", "Masala tea", "vegetarian, snack"),
+        item("French Fries", "Snacks", 99, 330, 4, 42, "Potato, salt, seasoning", "None", True, False, "", "Cola, shake", "vegan, snack"),
+        item("Paneer Pakora", "Snacks", 139, 370, 16, 28, "Paneer, gram flour, spices, chutney", "Dairy", False, True, "Mild", "Tea, lemon soda", "vegetarian"),
+        item("Pav Bhaji", "Snacks", 149, 430, 10, 64, "Pav, vegetable mash, butter, spices", "Gluten, dairy", False, True, "Medium", "Masala soda", "vegetarian, street food"),
+        item("Nachos with Salsa", "Snacks", 169, 410, 9, 54, "Corn chips, salsa, jalapeno, cheese sauce", "Dairy", False, True, "Mild", "Mocktail, cola", "vegetarian"),
+        item("Classic Cola", "Soft Drinks", 59, 140, 0, 36, "Carbonated water, sugar, cola flavor", "None", True, False, "", "Pairs with burgers and pizza", "beverage, vegan"),
+        item("Lemon Soda", "Soft Drinks", 69, 110, 0, 28, "Soda, lemon juice, sugar, salt", "None", True, False, "", "Pairs with spicy food", "beverage, vegan"),
+        item("Orange Fizz", "Soft Drinks", 79, 130, 0, 32, "Orange syrup, soda, ice", "None", True, False, "", "Pairs with snacks", "beverage, vegan"),
+        item("Cappuccino", "Coffee", 129, 120, 6, 12, "Espresso, steamed milk, foam", "Dairy", False, False, "", "Pairs with desserts", "coffee"),
+        item("Cold Coffee", "Coffee", 149, 240, 7, 34, "Coffee, milk, sugar, ice cream", "Dairy", False, False, "", "Pairs with burgers and brownies", "coffee, cold"),
+        item("Americano", "Coffee", 99, 15, 0, 2, "Espresso, hot water", "None", True, False, "", "Pairs with cheesecake", "coffee, vegan, low calorie"),
+        item("Masala Tea", "Tea", 49, 90, 3, 14, "Tea, milk, ginger, cardamom, spices", "Dairy", False, False, "", "Pairs with samosa and pakora", "tea"),
+        item("Lemon Tea", "Tea", 59, 45, 0, 10, "Tea, lemon, honey, hot water", "None", True, False, "", "Pairs with snacks", "tea, vegan"),
+        item("Iced Peach Tea", "Tea", 99, 120, 0, 30, "Black tea, peach syrup, ice", "None", True, False, "", "Pairs with pizza and burgers", "tea, cold, vegan"),
+        item("Virgin Mojito", "Mocktails", 129, 130, 0, 34, "Mint, lemon, soda, sugar, ice", "None", True, False, "", "Pairs with Indian and Chinese", "mocktail, vegan"),
+        item("Blue Lagoon", "Mocktails", 139, 150, 0, 38, "Blue curacao syrup, lemon, soda, ice", "None", True, False, "", "Pairs with spicy food", "mocktail, vegan"),
+        item("Watermelon Cooler", "Mocktails", 149, 120, 1, 30, "Watermelon, lemon, mint, ice", "None", True, False, "", "Pairs with snacks and pizza", "mocktail, vegan"),
+        item("Chocolate Shake", "Shakes", 159, 420, 10, 58, "Milk, chocolate syrup, ice cream", "Dairy", False, False, "", "Pairs with fries and burgers", "shake"),
+        item("Mango Shake", "Shakes", 149, 330, 8, 52, "Mango, milk, sugar, ice", "Dairy", False, False, "", "Pairs with Indian food", "shake"),
+        item("Oreo Shake", "Shakes", 179, 480, 9, 66, "Milk, Oreo cookies, ice cream", "Dairy, gluten", False, False, "", "Pairs with desserts", "shake, dessert"),
     ]
 
     for data in items:
         if frappe.db.exists("Food Item", data["item_name"]):
-            continue
-        doc = frappe.new_doc("Food Item")
+            doc = frappe.get_doc("Food Item", data["item_name"])
+        else:
+            doc = frappe.new_doc("Food Item")
         doc.update(data)
-        doc.insert(ignore_permissions=True)
+        doc.save(ignore_permissions=True)
 
     settings = frappe.get_single("Restaurant Settings")
     settings.restaurant_name = "Fresh Bite Restaurant"
@@ -367,4 +399,4 @@ def create_sample_data():
     settings.save(ignore_permissions=True)
 
     frappe.db.commit()
-    return "Sample food ordering data created"
+    return f"Sample food ordering data created or updated with {len(category_descriptions)} categories and {len(items)} items"

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520">
+  <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ef233c"/><stop offset="1" stop-color="#2b2d42"/></linearGradient></defs>
+  <rect width="800" height="520" rx="34" fill="url(#g)"/>
+  <path d="M230 255h340l-45 120H275Z" fill="#fff1c1"/>
+  <path d="M270 245c50-45 230-45 280 0" fill="none" stroke="#fca311" stroke-width="24" stroke-linecap="round"/>
+  <path d="M520 165 360 330M555 190 390 345" stroke="#fff" stroke-width="16" stroke-linecap="round"/>
+  <text x="400" y="455" text-anchor="middle" font-family="Arial" font-size="58" font-weight="700" fill="#fff">Chinese</text>
+</svg>

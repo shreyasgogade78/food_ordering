@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520">
+  <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#00b4d8"/><stop offset="1" stop-color="#0077b6"/></linearGradient></defs>
+  <rect width="800" height="520" rx="34" fill="url(#g)"/>
+  <rect x="315" y="150" width="170" height="245" rx="38" fill="#e63946"/>
+  <rect x="340" y="110" width="120" height="55" rx="18" fill="#f1faee"/>
+  <circle cx="400" cy="280" r="55" fill="#fff"/>
+  <text x="400" y="455" text-anchor="middle" font-family="Arial" font-size="58" font-weight="700" fill="#fff">Soft Drinks</text>
+</svg>

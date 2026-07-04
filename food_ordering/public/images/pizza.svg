@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520">
+  <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ffcf5a"/><stop offset="1" stop-color="#e94f37"/></linearGradient></defs>
+  <rect width="800" height="520" rx="34" fill="url(#g)"/>
+  <circle cx="400" cy="270" r="145" fill="#ffe3a1"/>
+  <path d="M400 125 545 415H255Z" fill="#f7b731"/>
+  <circle cx="390" cy="245" r="18" fill="#d63031"/><circle cx="450" cy="315" r="18" fill="#d63031"/><circle cx="345" cy="325" r="18" fill="#d63031"/>
+  <text x="400" y="455" text-anchor="middle" font-family="Arial" font-size="58" font-weight="700" fill="#fff">Pizza</text>
+</svg>

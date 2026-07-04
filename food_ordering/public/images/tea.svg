@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520">
+  <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#d8f3dc"/><stop offset="1" stop-color="#40916c"/></linearGradient></defs>
+  <rect width="800" height="520" rx="34" fill="url(#g)"/>
+  <path d="M280 245h250v70c0 65-55 105-125 105s-125-40-125-105Z" fill="#fff8dc"/>
+  <path d="M530 265h50c45 0 45 70 0 70h-50" fill="none" stroke="#fff8dc" stroke-width="22"/>
+  <path d="M355 185c0 35-22 35-22 68M425 170c0 35-22 35-22 72" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+  <text x="400" y="455" text-anchor="middle" font-family="Arial" font-size="58" font-weight="700" fill="#fff">Tea</text>
+</svg>

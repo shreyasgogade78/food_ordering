@@ -7,6 +7,9 @@ This is a custom Frappe Framework app for a restaurant food ordering system with
 - Food menu
 - Search foods
 - Category filters
+- 11 food and beverage categories
+- 50 seeded food and beverage items
+- Local category image assets for menu cards
 - Vegan and spicy filters
 - User login/signup through Frappe
 - Cart system for logged-in users
@@ -47,6 +50,25 @@ The chatbot can answer questions about:
 - `Food Item`
 - `Food Cart Item`
 - `Restaurant Settings`
+
+## Seeded Categories
+
+Food categories:
+
+- Pizza
+- Burgers
+- Indian
+- Chinese
+- Desserts
+- Snacks
+
+Beverage categories:
+
+- Soft Drinks
+- Coffee
+- Tea
+- Mocktails
+- Shakes
 
 ## Main Files
 
@@ -199,4 +221,3 @@ bench --site SITE_NAME migrate
 bench --site SITE_NAME execute food_ordering.api.create_sample_data
 bench start
 ```
-

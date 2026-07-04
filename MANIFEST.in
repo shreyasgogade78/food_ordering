@@ -6,4 +6,5 @@ recursive-include food_ordering/food_ordering *.py
 recursive-include food_ordering/templates *.html
 recursive-include food_ordering/public *.css
 recursive-include food_ordering/public *.js
+recursive-include food_ordering/public *.svg
 include README.md
