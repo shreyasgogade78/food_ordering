@@ -159,7 +159,7 @@ Login with:
 
 ```text
 Username: Administrator
-Password: the password you set during bench new-site
+Password: NicolaAvi5
 ```
 
 ## Useful Commands
