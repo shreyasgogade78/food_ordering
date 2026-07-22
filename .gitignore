@@ -20,9 +20,9 @@ assets/
 .DS_Store
 .idea/
 .vscode/
+.Rhistory
 
 # Secrets
 *.env
 site_config.json
 common_site_config.json
-

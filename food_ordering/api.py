@@ -1,4 +1,6 @@
 import re
+import zlib
+from urllib.parse import quote
 
 import frappe
 from frappe import _
@@ -156,17 +158,98 @@ def get_cart():
     return {"items": rows, "total": total}
 
 
+# ---------------------------------------------------------------------------
+# Chatbot
+# ---------------------------------------------------------------------------
+
+GREETING_WORDS = ("hi", "hii", "hello", "hey", "namaste", "good morning", "good afternoon", "good evening")
+THANKS_WORDS = ("thank you", "thanks", "thank u", "thnx", "great", "awesome")
+FAREWELL_WORDS = ("bye", "goodbye", "see you", "good night", "take care")
+
+ADD_TO_CART_PHRASES = (
+    "add to cart",
+    "add it to cart",
+    "add it to my cart",
+    "add to my cart",
+    "order it",
+    "buy it",
+    "i want to order",
+    "i would like to order",
+    "i'd like to order",
+)
+
+REMOVE_FROM_CART_PHRASES = ("remove", "delete", "take out", "cancel")
+
+NUMBER_WORDS = {
+    "a": 1,
+    "an": 1,
+    "one": 1,
+    "single": 1,
+    "couple": 2,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+}
+
+
 @frappe.whitelist(allow_guest=True)
 def chatbot(message):
     question = (message or "").strip()
     if not question:
-        return {"answer": "Ask me about calories, ingredients, protein, carbs, drinks, spice, vegan food, allergies, diets, or restaurant timings."}
+        return {"answer": _help_answer()}
 
     lower = question.lower()
-    item = _find_food_item(lower)
 
+    # --- small talk -------------------------------------------------------
+    if _matches(lower, *GREETING_WORDS):
+        return {"answer": _greeting_answer()}
+
+    if _matches(lower, *FAREWELL_WORDS):
+        return {"answer": "Goodbye! Have a delicious day. 🍽️"}
+
+    if _matches(lower, *THANKS_WORDS) and not _find_food_item(lower):
+        return {"answer": "You're welcome! Anything else I can help you order?"}
+
+    # --- restaurant info ---------------------------------------------------
     if _matches(lower, "timing", "time", "open", "close", "hours"):
         return {"answer": _restaurant_timings_answer()}
+
+    if _matches(lower, "delivery", "deliver", "shipping"):
+        return {"answer": _delivery_answer()}
+
+    # --- browsing / discovery ----------------------------------------------
+    # Check for a specific category ("pizza menu", "show desserts") BEFORE the
+    # generic "menu" keyword, otherwise the generic check always wins and a
+    # request like "show me the pizza menu" incorrectly lists all categories
+    # instead of pizza items.
+    category = _find_category(lower)
+    if category and _matches(
+        lower, "show", "list", "what", "items", "have", "menu", "give me", "any"
+    ):
+        return {"answer": _category_items_answer(category)}
+
+    if _matches(
+        lower,
+        "menu",
+        "categories",
+        "category list",
+        "full menu",
+        "what do you have",
+        "what do you serve",
+        "what's available",
+        "what is available",
+    ):
+        return {"answer": _list_categories_answer()}
+
+    price_range_answer = _price_range_answer(lower)
+    if price_range_answer:
+        return {"answer": price_range_answer}
 
     if _matches(lower, "vegan"):
         return {"answer": _list_items({"is_vegan": 1}, "Vegan options")}
@@ -177,6 +260,41 @@ def chatbot(message):
     if _matches(lower, "diet", "healthy", "fitness", "low calorie", "weight loss"):
         return {"answer": _diet_answer()}
 
+    if _matches(
+        lower,
+        "recommend",
+        "suggest",
+        "popular",
+        "best seller",
+        "bestseller",
+        "special",
+        "what should i eat",
+        "what should i order",
+        "chef's pick",
+        "anything good",
+    ):
+        return {"answer": _recommend_items_answer()}
+
+    # --- cart & checkout -----------------------------------------------------
+    if _matches(lower, "cart", "my order") and _matches(lower, "what", "show", "view", "total", "check", "in my"):
+        return {"answer": _cart_summary_answer()}
+
+    if _matches(lower, "checkout", "place order", "place my order", "confirm order", "pay"):
+        return {"answer": _checkout_answer()}
+
+    if _matches(lower, "clear cart", "empty cart", "empty my cart"):
+        return {"answer": _clear_cart_answer()}
+
+    # --- item specific -------------------------------------------------------
+    item = _find_food_item(lower)
+
+    if item and _wants_remove(lower):
+        return {"answer": _chat_remove_from_cart_answer(item)}
+
+    if item and _wants_add(lower):
+        quantity = _extract_quantity(lower)
+        return {"answer": _chat_add_to_cart_answer(item, quantity)}
+
     if item:
         if _matches(lower, "calorie", "calories", "kcal"):
             return {"answer": f"{item.item_name} has about {item.calories or 0} calories."}
@@ -184,10 +302,12 @@ def chatbot(message):
             return {"answer": f"{item.item_name} ingredients: {item.ingredients or 'Ingredients are not updated yet.'}"}
         if _matches(lower, "protein", "carb", "carbs", "nutrition", "macro"):
             return {"answer": f"{item.item_name} has {item.protein or 0}g protein and {item.carbs or 0}g carbs."}
-        if _matches(lower, "drink", "drinks", "beverage"):
+        if _matches(lower, "drink", "drinks", "beverage", "pair"):
             return {"answer": f"Best drinks with {item.item_name}: {item.recommended_drinks or 'Water, lemonade, or iced tea.'}"}
         if _matches(lower, "allergy", "allergies", "allergen", "allergens"):
             return {"answer": f"{item.item_name} allergens: {item.allergens or 'No allergen information listed.'}"}
+        if _matches(lower, "price", "cost", "how much", "rate"):
+            return {"answer": f"{item.item_name} costs ₹{item.price}."}
         if _matches(lower, "vegan"):
             return {"answer": f"{item.item_name} is {'vegan' if item.is_vegan else 'not marked as vegan'}."}
         if _matches(lower, "spicy", "hot"):
@@ -195,14 +315,176 @@ def chatbot(message):
             return {"answer": f"{item.item_name} spice level: {level}."}
         return {"answer": _item_summary(item)}
 
-    if _matches(lower, "calorie", "protein", "carb", "ingredient", "allergy", "drink"):
-        return {"answer": "Please mention a food name, for example: calories in Paneer Tikka or ingredients of Veg Burger."}
+    if _matches(lower, "calorie", "protein", "carb", "ingredient", "allergy", "drink", "price", "cost"):
+        return {"answer": "Please mention a food name, for example: calories in Paneer Tikka or price of Veg Burger."}
 
-    return {"answer": "I can help with calories, ingredients, protein/carbs, drinks, spicy food, vegan options, allergies, diet suggestions, and restaurant timings."}
+    return {"answer": _help_answer()}
 
 
-def _matches(text, *words):
-    return any(word in text for word in words)
+def _matches(text, *phrases):
+    return any(re.search(rf"\b{re.escape(phrase)}\b", text) for phrase in phrases)
+
+
+def _help_answer():
+    return (
+        "I can help you browse the menu, check calories/ingredients/protein/carbs, find vegan or spicy "
+        "dishes, get diet suggestions, recommend dishes, tell you prices, add items to your cart, "
+        "show your cart total, help you checkout, and share our timings and delivery info. "
+        "Just ask, e.g. 'add 2 paneer tikka pizza to cart' or 'what's in my cart?'"
+    )
+
+
+def _greeting_answer():
+    settings = frappe.get_single("Restaurant Settings")
+    name = settings.restaurant_name or "our restaurant"
+    return f"Hello! Welcome to {name}. What would you like to eat today? You can ask about the menu, get recommendations, or start ordering."
+
+
+def _delivery_answer():
+    return "We deliver to your registered address after checkout. Delivery time typically depends on your location and current order volume."
+
+
+def _extract_quantity(text):
+    match = re.search(r"\b(\d{1,2})\b", text)
+    if match:
+        qty = int(match.group(1))
+        return qty if qty > 0 else 1
+    for word, value in NUMBER_WORDS.items():
+        if re.search(rf"\b{word}\b", text):
+            return value
+    return 1
+
+
+def _wants_add(text):
+    if _matches(text, *ADD_TO_CART_PHRASES):
+        return True
+    return bool(re.match(r"^(add|order|buy|get me|i want|i'd like|i would like)\b", text.strip()))
+
+
+def _wants_remove(text):
+    return _matches(text, *REMOVE_FROM_CART_PHRASES) and _matches(text, "cart", "order")
+
+
+def _chat_add_to_cart_answer(item, quantity):
+    if frappe.session.user == "Guest":
+        return f"Please log in so I can add {item.item_name} to your cart."
+    add_to_cart(item.name, quantity)
+    cart = get_cart()
+    return f"Added {quantity} x {item.item_name} to your cart. Cart total: ₹{cart['total']}. Say 'checkout' whenever you're ready."
+
+
+def _chat_remove_from_cart_answer(item):
+    if frappe.session.user == "Guest":
+        return "Please log in to modify your cart."
+    existing = frappe.get_all(
+        "Food Cart Item",
+        filters={"user": frappe.session.user, "food_item": item.name},
+        fields=["name"],
+        limit=1,
+    )
+    if not existing:
+        return f"{item.item_name} is not currently in your cart."
+    remove_from_cart(existing[0].name)
+    cart = get_cart()
+    return f"Removed {item.item_name} from your cart. Cart total: ₹{cart['total']}."
+
+
+def _cart_summary_answer():
+    if frappe.session.user == "Guest":
+        return "Please log in to view your cart."
+    cart = get_cart()
+    if not cart["items"]:
+        return "Your cart is empty. Browse the menu and add something delicious!"
+    lines = [f"{row.item_name} x{row.quantity} (₹{row.amount})" for row in cart["items"]]
+    return "Your cart: " + ", ".join(lines) + f". Total: ₹{cart['total']}."
+
+
+def _checkout_answer():
+    if frappe.session.user == "Guest":
+        return "Please log in to checkout."
+    cart = get_cart()
+    if not cart["items"]:
+        return "Your cart is empty. Add a few items before checking out."
+    return f"Your cart total is ₹{cart['total']}. Please proceed to the checkout page to confirm payment and delivery details."
+
+
+def _clear_cart_answer():
+    if frappe.session.user == "Guest":
+        return "Please log in to manage your cart."
+    clear_cart()
+    return "Your cart has been cleared."
+
+
+def _find_category(text):
+    categories = frappe.get_all("Food Category", fields=["name", "category_name"])
+    cleaned = re.sub(r"[^a-z0-9 ]", " ", text)
+    for cat in categories:
+        cat_name = (cat.category_name or "").lower()
+        if cat_name and cat_name in cleaned:
+            return cat
+    return None
+
+
+def _category_items_answer(category):
+    items = frappe.get_all(
+        "Food Item",
+        filters={"category": category.name, "disabled": 0},
+        fields=["item_name", "price"],
+        order_by="item_name asc",
+        limit=10,
+    )
+    if not items:
+        return f"No items found in {category.category_name} right now."
+    names = [f"{item.item_name} (₹{item.price})" for item in items]
+    return f"{category.category_name} menu: " + ", ".join(names)
+
+
+def _list_categories_answer():
+    categories = frappe.get_all("Food Category", fields=["category_name"], order_by="category_name asc")
+    if not categories:
+        return "No categories are available right now."
+    return "We have: " + ", ".join(cat.category_name for cat in categories) + ". Ask me to show items from any of these!"
+
+
+def _price_range_answer(text):
+    match = re.search(
+        r"(?:under|below|less than|lesser than|cheaper than|within|up to|upto)\s*(?:rs\.?|inr|₹)?\s*(\d+)",
+        text,
+    )
+    if not match:
+        match = re.search(r"(?:rs\.?|inr|₹)\s*(\d+)\s*(?:or less|and below|or under)", text)
+    if not match:
+        return None
+    limit = int(match.group(1))
+    items = frappe.get_all(
+        "Food Item",
+        filters={"disabled": 0, "price": ["<=", limit]},
+        fields=["item_name", "price"],
+        order_by="price asc",
+        limit=10,
+    )
+    if not items:
+        return f"No items found under ₹{limit}."
+    names = [f"{item.item_name} (₹{item.price})" for item in items]
+    return f"Items under ₹{limit}: " + ", ".join(names)
+
+
+def _recommend_items_answer():
+    categories = frappe.get_all("Food Category", fields=["name"], order_by="category_name asc", limit=6)
+    picks = []
+    for cat in categories:
+        items = frappe.get_all(
+            "Food Item",
+            filters={"category": cat.name, "disabled": 0},
+            fields=["item_name", "price"],
+            order_by="item_name asc",
+            limit=1,
+        )
+        if items:
+            picks.append(f"{items[0].item_name} (₹{items[0].price})")
+    if not picks:
+        return "I don't have recommendations right now."
+    return "Here are some dishes you might enjoy: " + ", ".join(picks)
 
 
 def _find_food_item(text):
@@ -277,7 +559,10 @@ def _diet_answer():
 def _item_summary(item):
     vegan = "vegan" if item.is_vegan else "non-vegan"
     spicy = f", {item.spicy_level.lower()} spicy" if item.spicy_level else ""
-    return f"{item.item_name} is a {vegan}{spicy} item with {item.calories or 0} calories, {item.protein or 0}g protein, and {item.carbs or 0}g carbs."
+    return (
+        f"{item.item_name} is a {vegan}{spicy} item with {item.calories or 0} calories, {item.protein or 0}g protein, "
+        f"and {item.carbs or 0}g carbs, priced at ₹{item.price}. Say 'add {item.item_name} to cart' to order it."
+    )
 
 
 @frappe.whitelist()
@@ -312,12 +597,14 @@ def create_sample_data():
         doc.save(ignore_permissions=True)
 
     def item(name, category, price, calories, protein, carbs, ingredients, allergens, vegan, spicy, spice, drinks, tags):
+        photo_query = quote(f"{name} food", safe="")
+        photo_lock = zlib.crc32(name.encode("utf-8")) % 10000
         return {
             "item_name": name,
             "category": category,
             "price": price,
-            "description": f"{name} from our {category} menu.",
-            "image": category_images[category],
+            "description": f"Freshly prepared {name}, served from our {category} menu.",
+            "image": f"https://loremflickr.com/720/480/{photo_query}?lock={photo_lock}",
             "calories": calories,
             "protein": protein,
             "carbs": carbs,

@@ -1,4 +1,4 @@
-# Food Ordering App for Frappe Framework
+# Food Ordering System on Frappe Framework
 
 This is a custom Frappe Framework app for a restaurant food ordering system with a menu, search, category filters, user login/signup, cart system, and an AI-style food chatbot.
 

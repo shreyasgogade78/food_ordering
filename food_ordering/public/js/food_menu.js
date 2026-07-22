@@ -74,11 +74,15 @@
 
         return `
           <article class="food-card">
-            <div class="food-image">${item.image ? `<img src="${escapeHtml(item.image)}" alt="">` : "🍽️"}</div>
+            <div class="food-image">
+              ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.item_name)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false">` : ""}
+              <span class="food-image-fallback" ${item.image ? "hidden" : ""}>Photo unavailable</span>
+              <span class="food-category">${escapeHtml(item.category)}</span>
+            </div>
             <div class="food-card-body">
               <div class="food-card-top">
                 <h3>${escapeHtml(item.item_name)}</h3>
-                <strong>${money(item.price)}</strong>
+                <strong class="food-price">${money(item.price)}</strong>
               </div>
               <p>${escapeHtml(item.description)}</p>
               <div class="food-meta">
@@ -188,4 +192,3 @@
 
   frappe.ready(init);
 })();
-
