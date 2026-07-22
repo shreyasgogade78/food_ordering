@@ -181,7 +181,7 @@ Login with:
 
 ```text
 Username: Administrator
-Password: the password you set during bench new-site
+Password: NicolaAvi5
 ```
 
 ## Useful Commands
@@ -215,9 +215,9 @@ bench --site food.localhost execute food_ordering.api.create_sample_data
 Anyone can install this app into an existing Frappe Bench using:
 
 ```bash
-bench get-app https://github.com/YOUR_USERNAME/food_ordering.git
-bench --site SITE_NAME install-app food_ordering
-bench --site SITE_NAME migrate
-bench --site SITE_NAME execute food_ordering.api.create_sample_data
+bench get-app https://github.com/shreyasgogade78/food_ordering.git
+bench --site food.localhost install-app food_ordering
+bench --site food.localhost migrate
+bench --site food.localhost execute food_ordering.api.create_sample_data
 bench start
 ```
